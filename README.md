@@ -4,18 +4,19 @@ A data visualization page for [Collective Action in Tech](https://collectiveacti
 
 ## Data
 
-`Human-editing - for_download.csv` — the raw export from the archive. 488 records with usable dates, spanning 2015–2025.
+`raw_data.csv` — the export from the archive. 232 records, 2014–2026. `build.py` aggregates it into `data.js`; re-run it whenever the CSV changes.
 
 Fields the visualization uses:
 
 | Column | Used for |
 |---|---|
-| `published_date` | quarter, for the cumulative line |
-| `issue_tags` | tag graph, issue view |
-| `action_tags` | tag graph, action view |
-| `company_coded` | employer graph |
-| `location` | not used yet |
-| `n_employees`, `summary` | not used yet |
+| `date` | year, for the per-year bars |
+| `struggle_type` | per-year bars, events view (internal / external) |
+| `workers` | per-year bars, workers view |
+| `actions` | tag graph, actions view |
+| `struggles` | tag graph, struggles view |
+| `companies` | employer graph |
+| everything else | not used yet |
 
 ## The visualization
 
@@ -23,30 +24,25 @@ Three graphs on one page. **Every graph is static** — each one shows all recor
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  1 · Cumulative observations by quarter         │
-│     (line graph, full width)                    │
+│  1 · Per year                                   │
+│     (bars, full width, toggle events ⇄ workers) │
 ├──────────────────────────┬──────────────────────┤
 │  2 · Tags                │  3 · Employers       │
 │    (circles, toggle      │    (horizontal bars, │
-│     issue ⇄ action)      │     descending)      │
+│     actions ⇄ struggles) │     descending)      │
 └──────────────────────────┴──────────────────────┘
 ```
 
-### 1 · Cumulative observations by quarter — top, full width
+### 1 · Per year — top, full width
 
-A line graph running left to right across the full span of the archive, with one point per quarter.
+One bar per year, 2014 → 2026. Years with no records still get a slot. A toggle switches between two views:
 
-The value at each quarter is the **running total of all observations recorded up to and including that quarter** — not that quarter's own count. So the line only ever rises or stays flat, ending at the total number of observations in the archive.
-
-- x axis: quarters, 2015 Q1 → 2025 Q4 (44 quarters)
-- y axis: cumulative observation count, 0 → 488
-- Quarters with no observations still appear on the axis; the line runs flat across them rather than skipping them.
-
-Reading the curve: a steep segment means many reports were recorded in a short window, a flat segment means few or none. No breakdown by tag and no legend for now.
+- **Events** — the number of records that year, stacked by `struggle_type`: internal, external, both (tagged `internal,external`), and unspecified (blank).
+- **Workers** — the sum of `workers` across that year's records. Only records with a number count (`2500+` counts as 2500); `unknown`, `hundreds`, `thousands` and blanks are skipped. 165 of 232 records give a number.
 
 ### 2 · Tags — bottom left
 
-Shows the distribution of `action_tag` and `issue_tag`. A toggle switches the view between the two; only one is shown at a time.
+Shows the distribution of `actions` and `struggles`. A toggle switches the view between the two; only one is shown at a time.
 
 In either view, **every tag is a circle**:
 
@@ -55,7 +51,7 @@ In either view, **every tag is a circle**:
 
 Layout reference: circle packing — circles of varying size packed inside a bounding shape, each labeled.
 
-> **Note on totals:** the tag counts sum to more than the total number of observations, because a single observation can carry several tags. The 488 records produce 779 issue-tag assignments (211 records carry more than one). The circles show tag frequency, not a partition of the records.
+> **Note on totals:** the tag counts sum to more than the total number of observations, because a single observation can carry several actions or struggles. The circles show tag frequency, not a partition of the records.
 
 ### 3 · Employers — bottom right
 
@@ -69,10 +65,10 @@ A horizontal bar graph of observation counts per employer, sorted descending so 
 
 Things worth knowing before reading anything into the graphs:
 
-- **`action_tags` is sparse.** Only 38 of 488 records carry an action tag, and none after 2019. The action view of the tag graph reflects a small, time-limited slice of the archive, not the whole thing.
-- **`issue_tags` is nearly complete.** 484 of 488 records tagged, 22 distinct tags.
-- **`gov_filing` and `gov-filing` are the same tag** entered two ways, and need normalizing to avoid splitting one category in two.
-- **The archive is concentrated on a few employers.** 70 distinct employers appear; Google accounts for 254 of the mentions.
-- **Some records name several employers** in one `company_coded` cell (e.g. `"Google, Amazon"`), so employer counts also sum to more than the record count.
-- **Recording is very uneven over time.** 5 of the 44 quarters have no observations at all, and 2018 Q2–Q4 alone accounts for 126 of the 488 records. On a cumulative line this shows up as a long flat start, a near-vertical rise through 2018, and a gradual taper after 2022.
-- **The dates are publication dates, not event dates.** The line tracks when reporting entered the archive, which is not the same as when the organizing happened.
+- **16 rows have `description` and `date` swapped.** `build.py` takes the date from whichever of the two columns holds one.
+- **Dates come in two formats**, `M/D/YYYY` and `YYYY-MM-DD`; both are parsed.
+- **`struggle_type` is blank for 29 records**, 28 of them from 2023 on, so the internal/external split thins out in recent years.
+- **`workers` is dominated by a few large actions.** The 2014 bar is almost entirely one class-action suit (60,000 plaintiffs).
+- **Tag typos are normalized in `build.py`:** `ai ethids` → `ai ethics`; `na` is dropped.
+- **Company names are case-folded** (`Google` = `google`). Related names are *not* merged: `google` / `alphabet`, `facebook` / `meta` stay separate.
+- **Some records name several employers** in one `companies` cell (e.g. `"google, alphabet"`), so employer counts sum to more than the record count.

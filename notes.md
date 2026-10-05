@@ -22,3 +22,8 @@
 * companies
 * workers: number of workers involved in the action
 * tags: more specific tags pertaining to current events
+
+bottom left graph should be actions / struggles
+for the top chat, it should be discrete bar graph per year. should be two views: 1 is observation of event per year, broken down by struggle_type internal/external; the other view is by number of involved employees.
+
+thinking about different visualization choices for now 

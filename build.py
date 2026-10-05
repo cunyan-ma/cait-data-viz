@@ -2,64 +2,86 @@
 import csv, json, re, os, collections
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-CSV  = os.path.join(ROOT, 'Human-editing - for_download.csv')
+CSV  = os.path.join(ROOT, 'raw_data.csv')
 OUT  = os.path.join(ROOT, 'data.js')
 
-def tags(cell):
+DATE = re.compile(r'^(\d{1,2})/(\d{1,2})/(\d{4})$|^(\d{4})-(\d{2})-(\d{2})$')
+ALIAS = {'ai ethids': 'ai ethics'}                  # typos in the source
+DROP  = {'na', ''}
+
+def iso(cell):
+    m = DATE.match((cell or '').strip())
+    if not m: return None
+    if m.group(3): return f'{m.group(3)}-{int(m.group(1)):02d}-{int(m.group(2)):02d}'
+    return '-'.join(m.group(4, 5, 6))
+
+def items(cell):
     out = []
-    for t in re.findall(r"[a-z][a-z_\-]+", (cell or '').lower()):
-        t = t.replace('_', '-')                     # gov_filing == gov-filing
-        if t in ('nan', 'issue-tags', 'action-tags') or t in out:
-            continue
-        out.append(t)
+    for t in (cell or '').split(','):
+        t = ALIAS.get(t.strip().lower(), t.strip().lower())
+        if t not in DROP and t not in out: out.append(t)
     return out
 
-rows = [r for r in csv.DictReader(open(CSV))
-        if re.match(r'^\d{4}-\d{2}-\d{2}$', (r['published_date'] or '').strip())]
+rows = []
+for r in csv.DictReader(open(CSV, encoding='utf-8-sig')):
+    # some rows have description and date swapped
+    d = iso(r['date']) or iso(r['description'])
+    if d: rows.append({**r, 'date': d})
 
-# --- 1. cumulative observations by quarter -------------------------------
-def qkey(d): return (int(d[:4]), (int(d[5:7]) - 1)//3 + 1)
-per_q = collections.Counter(qkey(r['published_date'].strip()) for r in rows)
-lo, hi = min(per_q), max(per_q)
-span, y, q = [], *lo
-while (y, q) <= hi:
-    span.append((y, q))
-    q += 1
-    if q == 5: q, y = 1, y + 1
-quarters, run = [], 0
-for (y, q) in span:
-    run += per_q[(y, q)]
-    quarters.append({'label': f'{y} Q{q}',
-                     'date': f'{y}-{3*(q-1)+1:02d}-01',
-                     'n': per_q[(y, q)], 'cum': run})
+# --- 1. per year: events by struggle_type, and workers involved ----------
+def stype(r):
+    s = set(items(r['struggle_type']))
+    if s == {'internal', 'external'}: return 'both'
+    if s in ({'internal'}, {'external'}): return s.pop()
+    return 'unspecified'
 
-# --- 2. tags -------------------------------------------------------------
+def nworkers(cell):
+    m = re.fullmatch(r'(\d[\d,]*)\+?', (cell or '').strip())
+    return int(m.group(1).replace(',', '')) if m else None
+
+TYPES = ['internal', 'external', 'both', 'unspecified']
+y0, y1 = min(int(r['date'][:4]) for r in rows), max(int(r['date'][:4]) for r in rows)
+years = {y: {'year': y, 'n': 0, **{t: 0 for t in TYPES}, 'workers': 0, 'counted': 0}
+         for y in range(y0, y1 + 1)}
+for r in rows:
+    yr = years[int(r['date'][:4])]
+    yr['n'] += 1
+    yr[stype(r)] += 1
+    w = nworkers(r['workers'])
+    if w is not None:
+        yr['workers'] += w
+        yr['counted'] += 1
+
+# --- 2. actions / struggles ----------------------------------------------
 def tally(field):
     c = collections.Counter()
     for r in rows:
-        for t in tags(r[field]): c[t] += 1
+        for t in items(r[field]): c[t] += 1
     return [{'tag': t, 'n': n} for t, n in c.most_common()]
 
 # --- 3. employers --------------------------------------------------------
-emp = collections.Counter()
+emp, label = collections.Counter(), {}
 for r in rows:
-    for name in (x.strip() for x in (r['company_coded'] or '').split(',')):
-        if name and name.lower() not in ('unnamed', 'error', 'company-coded', 'company_coded'):
-            emp[name] += 1
+    for name in (x.strip() for x in (r['companies'] or '').split(',')):
+        k = name.lower()
+        if not name or k in ('unnamed', 'unknown', 'error'): continue
+        emp[k] += 1
+        if k not in label or name.islower(): label[k] = name   # prefer the lower-case spelling
 
 data = {
-    'quarters':  quarters,
-    'issues':    tally('issue_tags'),
-    'actions':   tally('action_tags'),
-    'employers': [{'name': n, 'n': v} for n, v in emp.most_common()],
-    'meta': {'total': len(rows),
-             'from': rows and min(r['published_date'] for r in rows)[:4],
-             'to':   rows and max(r['published_date'] for r in rows)[:4]},
+    'years':     list(years.values()),
+    'types':     TYPES,
+    'actions':   tally('actions'),
+    'struggles': tally('struggles'),
+    'employers': [{'name': label[k], 'n': v} for k, v in emp.most_common()],
+    'meta': {'total': len(rows), 'from': str(y0), 'to': str(y1)},
 }
 with open(OUT, 'w') as f:
     f.write('const DATA = ' + json.dumps(data, separators=(',', ':')) + ';\n')
 
 print(f"{OUT}  {os.path.getsize(OUT)} bytes")
 print(f"  {data['meta']['total']} records  {data['meta']['from']}-{data['meta']['to']}")
-print(f"  {len(quarters)} quarters, cum ends at {quarters[-1]['cum']}")
-print(f"  {len(data['issues'])} issue tags, {len(data['actions'])} action tags, {len(data['employers'])} employers")
+print(f"  types: " + ', '.join(f"{t} {sum(y[t] for y in years.values())}" for t in TYPES))
+print(f"  workers: {sum(y['workers'] for y in years.values())} across "
+      f"{sum(y['counted'] for y in years.values())} records with a count")
+print(f"  {len(data['actions'])} actions, {len(data['struggles'])} struggles, {len(data['employers'])} employers")
