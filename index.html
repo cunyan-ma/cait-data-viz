@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Collective Action in Tech — Archive Figures</title>
+<style>
+  :root{
+    --ink:#111; --mid:#6B6B6B; --faint:#9A9A9A;
+    --grid:#E6E6E6; --rule:#D8D8D8; --bg:#FFF;
+    --font:Helvetica,"Helvetica Neue",Arial,"Liberation Sans",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px;background:#F2F2F2;font-family:var(--font);color:var(--ink)}
+  .fig{width:1120px;margin:0 auto;background:var(--bg);border:1px solid var(--rule);padding:30px 32px 26px}
+
+  .fig-head{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:22px}
+  .fig-head h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+  .fig-head span{font-size:11px;color:var(--mid);font-variant-numeric:tabular-nums}
+
+  h2{margin:0 0 7px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .sec-head{display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:10px}
+  .sec-head h2{margin:0}
+  .sec-head.left{justify-content:flex-start;gap:13px}
+  .cols{display:flex;gap:24px;margin-top:26px}
+
+  .toggle{display:inline-flex;border:1px solid var(--ink)}
+  .toggle button{font:inherit;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    background:transparent;color:var(--ink);border:0;border-right:1px solid var(--ink);
+    padding:3px 9px;cursor:pointer;line-height:1.5}
+  .toggle button:last-child{border-right:0}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .toggle button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+  svg{display:block}
+  text{font-family:var(--font)}
+  .ax text{font-size:9.5px;fill:var(--faint)}
+  .ax line,.ax path{stroke:var(--rule)}
+  .grid line{stroke:var(--grid);shape-rendering:crispEdges}
+  .n{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="fig">
+  <div class="fig-head">
+    <h1>Collective Action in Tech</h1>
+    <span id="meta"></span>
+  </div>
+
+  <section>
+    <div class="sec-head"><h2>Cumulative observations by quarter</h2></div>
+    <svg id="line" width="1056" height="252"></svg>
+  </section>
+
+  <div class="cols">
+    <section>
+      <div class="sec-head left" style="width:636px">
+        <h2>Tags</h2>
+        <span class="toggle" role="group" aria-label="Tag field">
+          <button id="t-issue"  aria-pressed="true">Issue</button>
+          <button id="t-action" aria-pressed="false">Action</button>
+        </span>
+      </div>
+      <svg id="tags" width="636" height="372"></svg>
+    </section>
+    <section>
+      <div class="sec-head" style="width:396px"><h2>Employers</h2></div>
+      <svg id="emp" width="396" height="372"></svg>
+    </section>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+/* ---------- greyscale ramp: rank 0 (largest) darkest ---------------------
+   swap this one function for a colour scale later                         */
+const shade = (i, n) => { const v = Math.round(58 + (n < 2 ? 0 : i/(n-1)) * 158);
+                          return `rgb(${v},${v},${v})`; };
+const onDark = c => +c.match(/\d+/)[0] < 138 ? "#fff" : "#111";
+const INK = "#1F1F1F", BAR = "#6E6E6E", AREA = "#ECECEC";
+
+d3.select("#meta").text(`${DATA.meta.total} observations · ${DATA.meta.from}–${DATA.meta.to}`);
+
+/* ============ 1 · cumulative line ====================================== */
+(function(){
+  const W = 1056, H = 252, M = {t:10, r:44, b:24, l:40};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const parse = d3.timeParse("%Y-%m-%d");
+  const qs = DATA.quarters.map(d => ({...d, dt: parse(d.date)}));
+  const last = qs[qs.length - 1];
+
+  const x = d3.scaleTime().domain(d3.extent(qs, d => d.dt)).range([0, iw]);
+  const y = d3.scaleLinear()
+              .domain([0, Math.ceil(d3.max(qs, d => d.cum)/100)*100])
+              .range([ih, 0]);
+
+  const g = d3.select("#line").append("g").attr("transform", `translate(${M.l},${M.t})`);
+
+  g.append("g").attr("class","grid").selectAll("line")
+    .data(y.ticks(5)).join("line")
+      .attr("x1",0).attr("x2",iw).attr("y1",y).attr("y2",y);
+
+  g.append("g").attr("class","ax")
+    .call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(8))
+    .call(s => s.select(".domain").remove());
+
+  g.append("g").attr("class","ax").attr("transform",`translate(0,${ih})`)
+    .call(d3.axisBottom(x).ticks(d3.timeYear).tickFormat(d3.timeFormat("%Y")).tickSize(4).tickPadding(6));
+
+  g.append("path").datum(qs).attr("fill", AREA)
+    .attr("d", d3.area().x(d => x(d.dt)).y0(ih).y1(d => y(d.cum)));
+
+  g.append("path").datum(qs).attr("fill","none").attr("stroke", INK).attr("stroke-width",1.6)
+    .attr("stroke-linejoin","round")
+    .attr("d", d3.line().x(d => x(d.dt)).y(d => y(d.cum)));
+
+  g.append("g").selectAll("circle").data(qs).join("circle")
+      .attr("cx", d => x(d.dt)).attr("cy", d => y(d.cum)).attr("r", 1.9)
+      .attr("fill", INK);
+
+  g.append("circle").attr("cx", x(last.dt)).attr("cy", y(last.cum)).attr("r", 3.4).attr("fill", INK);
+  g.append("text").attr("x", x(last.dt) + 8).attr("y", y(last.cum) + 4)
+    .attr("class","n").attr("font-size",11).attr("font-weight",700).attr("fill",INK)
+    .text(last.cum);
+})();
+
+/* ============ 2 · tags, circle pack ==================================== */
+const S = 356;                                    // pack square
+function drawTags(mode){
+  const arr = mode === "issue" ? DATA.issues : DATA.actions;
+  const n = arr.length;
+  const rank = new Map(arr.map((d,i) => [d.tag, i]));
+
+  const root = d3.pack().size([S,S]).padding(2.5)(
+    d3.hierarchy({children: arr}).sum(d => d.n).sort((a,b) => b.value - a.value));
+
+  const svg = d3.select("#tags"); svg.selectAll("*").remove();
+  const g = svg.append("g").attr("transform","translate(0,6)");
+
+  const node = g.selectAll("g").data(root.leaves()).join("g")
+      .attr("transform", d => `translate(${d.x},${d.y})`);
+
+  node.append("circle").attr("r", d => d.r)
+      .attr("fill", d => shade(rank.get(d.data.tag), n));
+
+  /* labels inside whichever circles can hold them ---------------------
+     a circle is narrowest at its top and bottom, so each candidate block
+     is measured against the chord at its outermost line, not the diameter */
+  const ctx = document.createElement("canvas").getContext("2d");
+  const tw = (str, fs) => { ctx.font = `${fs}px Helvetica, Arial, sans-serif`;
+                            return ctx.measureText(str).width; };
+
+  function wrap(words, fs, avail){
+    const lines = []; let cur = "";
+    for (const w of words){
+      if (tw(w, fs) > avail) return null;              // one word already too wide
+      const cand = cur ? cur + "-" + w : w;
+      if (tw(cand, fs) <= avail) cur = cand;
+      else { lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  function fit(tag, count, r){
+    const words = tag.split("-");
+    for (let fs = Math.min(14, r * 0.6); fs >= 7; fs -= 0.5){
+      const lineH = fs * 1.14;
+      for (let k = 1; k <= 3; k++){
+        const nl = k + 1;                              // name lines + the count
+        const yEdge = (nl - 1)/2 * lineH + fs * 0.42;
+        if (yEdge >= r * 0.99) continue;
+        const avail = 2 * Math.sqrt(r*r - yEdge*yEdge) * 0.92;
+        const lines = wrap(words, fs, avail);
+        if (!lines || lines.length !== k) continue;
+        if (tw(String(count), fs) > avail) continue;
+        return {fs, lines, lineH};
+      }
+    }
+    return null;                                       // too small — legend carries it
+  }
+
+  node.each(function(d){
+    const f = fit(d.data.tag, d.data.n, d.r);
+    if (!f) return;
+    const sel = d3.select(this);
+    const fill = onDark(shade(rank.get(d.data.tag), n));
+    let ty = -((f.lines.length + 1) * f.lineH)/2 + f.fs * 0.86;
+    for (const l of f.lines){
+      sel.append("text").attr("text-anchor","middle").attr("y", ty)
+         .attr("font-size", f.fs).attr("fill", fill).text(l);
+      ty += f.lineH;
+    }
+    sel.append("text").attr("text-anchor","middle").attr("y", ty)
+       .attr("class","n").attr("font-size", f.fs * 0.95).attr("font-weight", 700)
+       .attr("fill", fill).text(d.data.n);
+  });
+
+  /* legend: every tag, largest first */
+  const lx = S + 22, lw = 636 - lx, rowH = Math.min(16, (S - 6)/n);
+  const leg = svg.append("g").attr("transform",`translate(${lx},10)`);
+  const row = leg.selectAll("g").data(arr).join("g")
+      .attr("transform", (d,i) => `translate(0,${i*rowH})`);
+  row.append("rect").attr("width",9).attr("height",9).attr("y",-7.5)
+      .attr("fill",(d,i) => shade(i,n));
+  row.append("text").attr("x",15).attr("font-size",10).attr("fill","#333").text(d => d.tag);
+  row.append("text").attr("x",lw).attr("text-anchor","end").attr("class","n")
+      .attr("font-size",10).attr("font-weight",700).attr("fill","#111").text(d => d.n);
+}
+
+/* ============ 3 · employers ============================================ */
+(function(){
+  const W = 396, H = 372, TOP = 12;
+  const rows = DATA.employers.slice(0, TOP), rest = DATA.employers.length - rows.length;
+  const nameW = 104, valW = 34, x0 = nameW + 8, x1 = W - valW;
+  const rowH = 27, barH = 14;
+  const x = d3.scaleLinear().domain([0, d3.max(rows, d => d.n)]).range([0, x1 - x0]);
+
+  const g = d3.select("#emp").append("g").attr("transform","translate(0,14)");
+  const row = g.selectAll("g").data(rows).join("g")
+      .attr("transform",(d,i) => `translate(0,${i*rowH})`);
+
+  row.append("text").attr("x", nameW).attr("y", barH*0.78).attr("text-anchor","end")
+      .attr("font-size",10.5).attr("fill","#222").text(d => d.name);
+  row.append("rect").attr("x", x0).attr("width", x1-x0).attr("height", barH)
+      .attr("fill","#F1F1F1");
+  row.append("rect").attr("x", x0).attr("width", d => Math.max(1, x(d.n))).attr("height", barH)
+      .attr("fill", BAR);
+  row.append("text").attr("x", x1 + 6).attr("y", barH*0.82).attr("class","n")
+      .attr("font-size",10.5).attr("font-weight",700).attr("fill","#111").text(d => d.n);
+
+  g.append("text").attr("x", nameW).attr("y", TOP*rowH + 8).attr("text-anchor","end")
+      .attr("font-size",9.5).attr("fill","#9A9A9A").text(`+${rest} more`);
+})();
+
+/* ---------- toggle ---------- */
+const bI = document.getElementById("t-issue"), bA = document.getElementById("t-action");
+function setMode(m){
+  bI.setAttribute("aria-pressed", m === "issue");
+  bA.setAttribute("aria-pressed", m === "action");
+  drawTags(m);
+}
+bI.onclick = () => setMode("issue");
+bA.onclick = () => setMode("action");
+setMode(location.hash === "#action" ? "action" : "issue");   // #action for screenshots
+</script>
+</body>
+</html>
