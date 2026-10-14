@@ -2,6 +2,8 @@
 
 A data visualization page for [Collective Action in Tech](https://collectiveaction.tech)'s documented reporting database. Every record in the database is one reported instance of collective action by workers in the tech industry.
 
+The data tells the story of tech workers organizing from political issues to labor problems.
+
 ## Data
 
 `raw_data.csv` — the export from the archive. 232 records, 2014–2026. `build.py` aggregates it into `data.js`; re-run it whenever the CSV changes.
@@ -16,21 +18,6 @@ Fields the visualization uses:
 | `companies` | employer graph |
 | everything else | not used yet |
 
-## The visualization
-
-One static figure, designed to be read from a single screenshot (`./shot.sh` → `figure.png`). No toggles, no filters. Headline: **From open letters to union drives**.
-
-```
-┌─────────────────────────────────────────────────┐
-│  1 · Timeline — one dot per event, by quarter   │
-│      (full width, coloured by theme, 5 labels)  │
-├──────────────────────────┬──────────────────────┤
-│  2 · Action × struggle   │  3 · Employers       │
-│      (heatmap)           │   (bars by theme)    │
-├──────────────────────────┴──────────────────────┤
-│  source + caveats                               │
-└─────────────────────────────────────────────────┘
-```
 
 ### Theme
 
