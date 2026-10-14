@@ -3,274 +3,208 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Collective Action in Tech — Archive Figures</title>
+<title>Collective Action in Tech — Archive Figure</title>
 <style>
   :root{
-    --ink:#111; --mid:#6B6B6B; --faint:#9A9A9A;
-    --grid:#E6E6E6; --rule:#D8D8D8; --bg:#FFF;
+    --ink:#F2F2F2; --mid:#A3A3A3; --faint:#737373;
+    --rule:#2B2B2B; --bg:#000;
     --font:Helvetica,"Helvetica Neue",Arial,"Liberation Sans",sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;padding:26px;background:#F2F2F2;font-family:var(--font);color:var(--ink)}
-  .fig{width:1120px;margin:0 auto;background:var(--bg);border:1px solid var(--rule);padding:30px 32px 26px}
+  body{margin:0;padding:26px;background:var(--bg);font-family:var(--font);color:var(--ink)}
+  .fig{width:1120px;margin:0 auto;background:var(--bg);border:1px solid var(--rule);padding:30px 32px 22px}
 
   .fig-head{display:flex;justify-content:space-between;align-items:baseline;
-    border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:22px}
+    border-bottom:2px solid var(--ink);padding-bottom:9px;margin-bottom:16px}
   .fig-head h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
   .fig-head span{font-size:11px;color:var(--mid);font-variant-numeric:tabular-nums}
 
-  h2{margin:0 0 7px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-  .sec-head{display:flex;justify-content:space-between;align-items:center;
-    border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:10px}
-  .sec-head h2{margin:0}
-  .sec-head.left{justify-content:flex-start;gap:13px}
-  .cols{display:flex;gap:24px;margin-top:26px}
+  .lede{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4px}
+  .lede p{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .lede p small{display:block;margin-top:4px;font-size:12px;font-weight:400;color:var(--mid);letter-spacing:0}
+  .key{display:flex;gap:16px;font-size:11px;color:var(--mid)}
+  .key span{display:flex;align-items:center;gap:5px}
+  .key i{width:9px;height:9px;border-radius:50%;display:inline-block}
 
-  .toggle{display:inline-flex;border:1px solid var(--ink)}
-  .toggle button{font:inherit;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-    background:transparent;color:var(--ink);border:0;border-right:1px solid var(--ink);
-    padding:3px 9px;cursor:pointer;line-height:1.5}
-  .toggle button:last-child{border-right:0}
-  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
-  .toggle button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  h2{margin:0 0 7px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .sec-head{border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:10px}
+  .sec-head h2{margin:0}
+  .sec-head h2 small{font-weight:400;letter-spacing:0;text-transform:none;color:var(--faint);margin-left:8px;font-size:10.5px}
+  .cols{display:flex;gap:24px;margin-top:18px}
+
+  .notes{margin-top:14px;border-top:1px solid var(--rule);padding-top:8px;
+    font-size:10px;line-height:1.5;color:var(--faint)}
 
   svg{display:block}
   text{font-family:var(--font)}
-  .ax text{font-size:9.5px;fill:var(--faint)}
-  .ax line,.ax path{stroke:var(--rule)}
-  .grid line{stroke:var(--grid);shape-rendering:crispEdges}
   .n{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
 <div class="fig">
   <div class="fig-head">
-    <h1>Collective Action in Tech</h1>
     <span id="meta"></span>
   </div>
 
-  <section>
-    <div class="sec-head left">
-      <h2>Per year</h2>
-      <span class="toggle" role="group" aria-label="Yearly measure">
-        <button id="y-events"  aria-pressed="true">Events</button>
-        <button id="y-workers" aria-pressed="false">Workers</button>
-      </span>
-    </div>
-    <svg id="bars" width="1056" height="252"></svg>
-  </section>
+  <div class="lede">
+    <p><i>From open letters to union drives</i>
+      <small>In the past ten years, the tech workers movement shifted from ethics-centered protest to labor-focused union organizing.</small></p>
+      
+    <div class="key" id="key"></div>
+  </div>
+  <svg id="tl" width="1056" height="290"></svg>
 
   <div class="cols">
     <section>
-      <div class="sec-head left" style="width:636px">
-        <h2>Tags</h2>
-        <span class="toggle" role="group" aria-label="Tag field">
-          <button id="t-actions"   aria-pressed="true">Actions</button>
-          <button id="t-struggles" aria-pressed="false">Struggles</button>
-        </span>
-      </div>
-      <svg id="tags" width="636" height="372"></svg>
+      <div class="sec-head" style="width:560px"><h2>Action vs Issue<small>Workers voice ethical concerns through open letters & workplace concerns through union.</small></h2></div>
+      <svg id="hm" width="560" height="282"></svg>
     </section>
     <section>
-      <div class="sec-head" style="width:396px"><h2>Employers</h2></div>
-      <svg id="emp" width="396" height="372"></svg>
+      <div class="sec-head" style="width:472px"><h2>Where<small>% of documented actions take place in a big tech company.</small></h2></div>
+      <svg id="emp" width="472" height="282"></svg>
     </section>
   </div>
+
+  <div class="notes" id="notes"></div>
 </div>
 
 <script src="data.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
-/* ---------- greyscale ramp: rank 0 (largest) darkest ---------------------
-   swap this one function for a colour scale later                         */
-const shade = (i, n) => { const v = Math.round(58 + (n < 2 ? 0 : i/(n-1)) * 158);
-                          return `rgb(${v},${v},${v})`; };
-const onDark = c => +c.match(/\d+/)[0] < 138 ? "#fff" : "#111";
-const INK = "#1F1F1F", BAR = "#6E6E6E";
+/* ---------- colours: swap these ------------------------------------------ */
+const THEME = {labour:"#BD1C1C", both:"#5C5C5C", other:"#5C5C5C", ethics:"#16A624"};
+const C = {ink:"#F2F2F2", text:"#D4D4D4", mid:"#A3A3A3", faint:"#737373",
+           axis:"#4A4A4A", grid:"#1F1F1F", band:"#0B0B0B"};       // greys on black
+const ORDER = {labour:0, both:1, other:1, ethics:2};          // bottom → top of a stack
+const KEY   = [["ethics","ethics & politics"], ["labour","workplace & labour"], ["both","both / other"]];
+const S = DATA;
 
-d3.select("#meta").text(`${DATA.meta.total} observations · ${DATA.meta.from}–${DATA.meta.to}`);
+d3.select("#key").selectAll("span").data(KEY).join("span")
+  .html(([k, label]) => `<i style="background:${THEME[k]}"></i>${label}`);
 
-/* ============ 1 · per-year bars ======================================== */
-/* events view stacks by struggle_type; "both" = tagged internal AND external,
-   "unspecified" = blank. Swap these for colours later.                     */
-const TYPE_FILL = {internal:"#3A3A3A", external:"#8C8C8C", both:"#BEBEBE", unspecified:"#E2E2E2"};
-function drawYears(mode){
-  const W = 1056, H = 252, M = {t:22, r:10, b:24, l:48};
-  const iw = W - M.l - M.r, ih = H - M.t - M.b;
-  const ys = DATA.years, fmt = d3.format(",");
-  const val = d => mode === "events" ? d.n : d.workers;
-
-  const x = d3.scaleBand().domain(ys.map(d => d.year)).range([0, iw]).paddingInner(0.28).paddingOuter(0.14);
-  const y = d3.scaleLinear().domain([0, d3.max(ys, val)]).nice(5).range([ih, 0]);
-
-  const svg = d3.select("#bars"); svg.selectAll("*").remove();
-  const g = svg.append("g").attr("transform", `translate(${M.l},${M.t})`);
-
-  g.append("g").attr("class","grid").selectAll("line")
-    .data(y.ticks(5)).join("line")
-      .attr("x1",0).attr("x2",iw).attr("y1",y).attr("y2",y);
-
-  g.append("g").attr("class","ax")
-    .call(d3.axisLeft(y).ticks(5, mode === "events" ? "d" : "~s").tickSize(0).tickPadding(8))
-    .call(s => s.select(".domain").remove());
-
-  g.append("g").attr("class","ax").attr("transform",`translate(0,${ih})`)
-    .call(d3.axisBottom(x).tickSize(0).tickPadding(8));
-
-  if (mode === "events"){
-    const series = d3.stack().keys(DATA.types)(ys);
-    g.append("g").selectAll("g").data(series).join("g")
-        .attr("fill", s => TYPE_FILL[s.key])
-      .selectAll("rect").data(s => s).join("rect")
-        .attr("x", d => x(d.data.year)).attr("width", x.bandwidth())
-        .attr("y", d => y(d[1])).attr("height", d => y(d[0]) - y(d[1]));
-
-    const leg = svg.append("g").attr("transform", `translate(${M.l + 4},6)`);
-    let lx = 0;
-    for (const t of DATA.types){
-      const it = leg.append("g").attr("transform", `translate(${lx},0)`);
-      it.append("rect").attr("width",9).attr("height",9).attr("fill", TYPE_FILL[t]);
-      it.append("text").attr("x",14).attr("y",8).attr("font-size",10).attr("fill","#333").text(t);
-      lx += 22 + t.length * 6;
-    }
-  } else {
-    g.append("g").selectAll("rect").data(ys).join("rect")
-        .attr("x", d => x(d.year)).attr("width", x.bandwidth())
-        .attr("y", d => y(d.workers)).attr("height", d => ih - y(d.workers))
-        .attr("fill", BAR);
-
-    const counted = d3.sum(ys, d => d.counted);
-    svg.append("text").attr("x", M.l + 4).attr("y", 14).attr("font-size",10).attr("fill","#9A9A9A")
-       .text(`sum of reported workers · ${counted} of ${DATA.meta.total} events give a number`);
-  }
-
-  g.append("g").selectAll("text").data(ys).join("text")
-      .attr("x", d => x(d.year) + x.bandwidth()/2).attr("y", d => y(val(d)) - 5)
-      .attr("text-anchor","middle").attr("class","n")
-      .attr("font-size",10).attr("font-weight",700).attr("fill",INK)
-      .text(d => val(d) ? fmt(val(d)) : "");
-}
-
-/* ============ 2 · tags, circle pack ==================================== */
-const S = 356;                                    // pack square
-function drawTags(mode){
-  const arr = mode === "actions" ? DATA.actions : DATA.struggles;
-  const n = arr.length;
-  const rank = new Map(arr.map((d,i) => [d.tag, i]));
-
-  const root = d3.pack().size([S,S]).padding(2.5)(
-    d3.hierarchy({children: arr}).sum(d => d.n).sort((a,b) => b.value - a.value));
-
-  const svg = d3.select("#tags"); svg.selectAll("*").remove();
-  const g = svg.append("g").attr("transform","translate(0,6)");
-
-  const node = g.selectAll("g").data(root.leaves()).join("g")
-      .attr("transform", d => `translate(${d.x},${d.y})`);
-
-  node.append("circle").attr("r", d => d.r)
-      .attr("fill", d => shade(rank.get(d.data.tag), n));
-
-  /* labels inside whichever circles can hold them ---------------------
-     a circle is narrowest at its top and bottom, so each candidate block
-     is measured against the chord at its outermost line, not the diameter */
-  const ctx = document.createElement("canvas").getContext("2d");
-  const tw = (str, fs) => { ctx.font = `${fs}px Helvetica, Arial, sans-serif`;
-                            return ctx.measureText(str).width; };
-
-  function wrap(words, fs, avail){
-    const lines = []; let cur = "";
-    for (const w of words){
-      if (tw(w, fs) > avail) return null;              // one word already too wide
-      const cand = cur ? cur + " " + w : w;
-      if (tw(cand, fs) <= avail) cur = cand;
-      else { lines.push(cur); cur = w; }
-    }
-    if (cur) lines.push(cur);
-    return lines;
-  }
-
-  function fit(tag, count, r){
-    const words = tag.split(" ");
-    for (let fs = Math.min(14, r * 0.6); fs >= 7; fs -= 0.5){
-      const lineH = fs * 1.14;
-      for (let k = 1; k <= 3; k++){
-        const nl = k + 1;                              // name lines + the count
-        const yEdge = (nl - 1)/2 * lineH + fs * 0.42;
-        if (yEdge >= r * 0.99) continue;
-        const avail = 2 * Math.sqrt(r*r - yEdge*yEdge) * 0.92;
-        const lines = wrap(words, fs, avail);
-        if (!lines || lines.length !== k) continue;
-        if (tw(String(count), fs) > avail) continue;
-        return {fs, lines, lineH};
-      }
-    }
-    return null;                                       // too small — legend carries it
-  }
-
-  node.each(function(d){
-    const f = fit(d.data.tag, d.data.n, d.r);
-    if (!f) return;
-    const sel = d3.select(this);
-    const fill = onDark(shade(rank.get(d.data.tag), n));
-    let ty = -((f.lines.length + 1) * f.lineH)/2 + f.fs * 0.86;
-    for (const l of f.lines){
-      sel.append("text").attr("text-anchor","middle").attr("y", ty)
-         .attr("font-size", f.fs).attr("fill", fill).text(l);
-      ty += f.lineH;
-    }
-    sel.append("text").attr("text-anchor","middle").attr("y", ty)
-       .attr("class","n").attr("font-size", f.fs * 0.95).attr("font-weight", 700)
-       .attr("fill", fill).text(d.data.n);
-  });
-
-  /* legend: every tag, largest first */
-  const lx = S + 22, lw = 636 - lx, rowH = Math.min(16, (S - 6)/n);
-  const leg = svg.append("g").attr("transform",`translate(${lx},10)`);
-  const row = leg.selectAll("g").data(arr).join("g")
-      .attr("transform", (d,i) => `translate(0,${i*rowH})`);
-  row.append("rect").attr("width",9).attr("height",9).attr("y",-7.5)
-      .attr("fill",(d,i) => shade(i,n));
-  row.append("text").attr("x",15).attr("font-size",10).attr("fill","#333").text(d => d.tag);
-  row.append("text").attr("x",lw).attr("text-anchor","end").attr("class","n")
-      .attr("font-size",10).attr("font-weight",700).attr("fill","#111").text(d => d.n);
-}
-
-/* ============ 3 · employers ============================================ */
+/* ============ 1 · one dot per event, stacked by quarter ================= */
+/* labels are editorial: [year-month, text, height above baseline, anchor]  */
+const MOMENTS = [
+  ["2018-06", "letters against ICE & Pentagon contracts", 238, "end"],
+  ["2018-11", "Google walkout", 212, "start"],
+  ["2020-06", "BLM letters & walkouts", 238, "middle"],
+  ["2021-01", "Alphabet Workers Union", 212, "start"],
+  ["2023-03", "layoff protests", 150, "middle"],
+];
 (function(){
-  const W = 396, H = 372, TOP = 12;
-  const rows = DATA.employers.slice(0, TOP), rest = DATA.employers.length - rows.length;
-  const nameW = 104, valW = 34, x0 = nameW + 8, x1 = W - valW;
-  const rowH = 27, barH = 14;
-  const x = d3.scaleLinear().domain([0, d3.max(rows, d => d.n)]).range([0, x1 - x0]);
+  const W = 1056, H = 290, M = {t:6, r:4, b:22, l:26};
+  const y0 = +DATA.meta.from, y1 = +DATA.meta.to, nQ = (y1 - y0 + 1) * 4;
+  const base = H - M.b, cw = (W - M.l - M.r) / nQ, d = 9.5, step = d + 1.2;
+  const qOf = s => (+s.slice(0,4) - y0) * 4 + Math.floor((+s.slice(5,7) - 1) / 3);
+  const cx = q => M.l + (q + .5) * cw;
 
-  const g = d3.select("#emp").append("g").attr("transform","translate(0,14)");
-  const row = g.selectAll("g").data(rows).join("g")
-      .attr("transform",(d,i) => `translate(0,${i*rowH})`);
+  const bins = d3.group(S.events, e => qOf(e[0]));
+  const svg = d3.select("#tl");
 
-  row.append("text").attr("x", nameW).attr("y", barH*0.78).attr("text-anchor","end")
-      .attr("font-size",10.5).attr("fill","#222").text(d => d.name);
-  row.append("rect").attr("x", x0).attr("width", x1-x0).attr("height", barH)
-      .attr("fill","#F1F1F1");
-  row.append("rect").attr("x", x0).attr("width", d => Math.max(1, x(d.n))).attr("height", barH)
-      .attr("fill", BAR);
-  row.append("text").attr("x", x1 + 6).attr("y", barH*0.82).attr("class","n")
-      .attr("font-size",10.5).attr("font-weight",700).attr("fill","#111").text(d => d.n);
+  // alternate-year bands, gridlines every 5 events
+  for (let y = y0; y <= y1; y += 2)
+    svg.append("rect").attr("x", M.l + (y - y0) * 4 * cw).attr("width", 4 * cw)
+       .attr("y", M.t).attr("height", base - M.t).attr("fill", C.band);
+  for (const k of [5, 10, 15]){
+    const y = base - k * step;
+    svg.append("line").attr("x1", M.l).attr("x2", W - M.r).attr("y1", y).attr("y2", y)
+       .attr("stroke", C.grid).attr("shape-rendering", "crispEdges");
+    svg.append("text").attr("x", M.l - 6).attr("y", y + 3).attr("text-anchor", "end")
+       .attr("font-size", 9.5).attr("fill", C.faint).attr("class", "n").text(k);
+  }
+  svg.append("line").attr("x1", M.l).attr("x2", W - M.r).attr("y1", base + .5).attr("y2", base + .5)
+     .attr("stroke", C.axis);
+  for (let y = y0; y <= y1; y++)
+    svg.append("text").attr("x", M.l + ((y - y0) * 4 + 2) * cw).attr("y", base + 15)
+       .attr("text-anchor", "middle").attr("font-size", 10).attr("fill", C.mid).text(y);
 
-  g.append("text").attr("x", nameW).attr("y", TOP*rowH + 8).attr("text-anchor","end")
-      .attr("font-size",9.5).attr("fill","#9A9A9A").text(`+${rest} more`);
+  for (const [q, evs] of bins){
+    evs.slice().sort((a, b) => ORDER[a[1]] - ORDER[b[1]]).forEach((e, i) =>
+      svg.append("circle").attr("cx", cx(q)).attr("cy", base - d/2 - 1 - i * step)
+         .attr("r", d/2).attr("fill", THEME[e[1]]));
+  }
+
+  for (const [m, label, h, anchor] of MOMENTS){
+    const q = qOf(m + "-01"), top = base - (bins.get(q) || []).length * step - 3, ly = base - h;
+    svg.append("line").attr("x1", cx(q)).attr("x2", cx(q)).attr("y1", anchor === "middle" ? ly + 4 : ly - 9).attr("y2", top)
+       .attr("stroke", C.faint).attr("stroke-width", .75).attr("stroke-dasharray", "2 2");
+    const dx = anchor === "start" ? 4 : anchor === "end" ? -4 : 0;
+    svg.append("text").attr("x", cx(q) + dx).attr("y", ly).attr("text-anchor", anchor)
+       .attr("font-size", 10.5).attr("fill", C.text).text(label);
+  }
 })();
 
-/* ---------- toggles ---------- */
-function toggle(ids, draw){
-  const btns = ids.map(id => document.getElementById(id));
-  const set = m => { btns.forEach(b => b.setAttribute("aria-pressed", b.id.endsWith(m))); draw(m); };
-  btns.forEach(b => b.onclick = () => set(b.id.split("-")[1]));
-  return set;
-}
-// #struggles / #workers (or both: #struggles,workers) for screenshots
-const hash = location.hash.slice(1).split(",");
-toggle(["y-events", "y-workers"], drawYears)(hash.includes("workers") ? "workers" : "events");
-toggle(["t-actions", "t-struggles"], drawTags)(hash.includes("struggles") ? "struggles" : "actions");
+/* ============ 2 · action × struggle heatmap ============================= */
+(function(){
+  const m = S.matrix, rowW = 164, top = 50, cw = 64, ch = 40, gap = 12;
+  const max = d3.max(m.n.flat());
+  const colX = j => rowW + j * cw + (m.group[j] === "labour" ? gap : 0);
+  const svg = d3.select("#hm");
+
+  // group headers
+  for (const g of ["ethics", "labour"]){
+    const js = m.group.map((x, j) => x === g ? j : -1).filter(j => j >= 0);
+    const x0 = colX(js[0]) + 2, x1 = colX(js[js.length - 1]) + cw - 2;
+    svg.append("rect").attr("x", x0).attr("y", 2).attr("width", x1 - x0).attr("height", 3).attr("fill", THEME[g]);
+    svg.append("text").attr("x", x0).attr("y", 16).attr("font-size", 10).attr("font-weight", 700)
+       .attr("fill", C.text).text(g === "ethics" ? "ethics & politics" : "workplace & labour");
+  }
+  // column labels (two lines max)
+  m.struggles.forEach((s, j) => {
+    const words = s.split(" "), half = Math.ceil(words.length / 2);
+    const lines = words.length > 1 ? [words.slice(0, half).join(" "), words.slice(half).join(" ")] : [s];
+    lines.forEach((l, k) => svg.append("text").attr("x", colX(j) + cw/2)
+      .attr("y", top - 6 - (lines.length - 1 - k) * 11).attr("text-anchor", "middle")
+      .attr("font-size", 9.5).attr("fill", C.mid).text(l));
+  });
+  m.actions.forEach((a, i) => {
+    svg.append("text").attr("x", rowW - 10).attr("y", top + i * ch + ch/2 + 3.5)
+       .attr("text-anchor", "end").attr("font-size", 10.5).attr("fill", C.text).text(a);
+    m.n[i].forEach((v, j) => {
+      const t = Math.sqrt(v / max);
+      svg.append("rect").attr("x", colX(j) + 1).attr("y", top + i * ch + 1)
+         .attr("width", cw - 2).attr("height", ch - 2)
+         .attr("fill", THEME[m.group[j]]).attr("fill-opacity", (0.06 + 0.94 * t).toFixed(2));
+      svg.append("text").attr("x", colX(j) + cw/2).attr("y", top + i * ch + ch/2 + 3.5)
+         .attr("text-anchor", "middle").attr("class", "n").attr("font-size", 10.5)
+         .attr("font-weight", t > .55 ? 700 : 400).attr("fill", C.ink).text(v);
+    });
+  });
+})();
+
+/* ============ 3 · employers, stacked by theme =========================== */
+(function(){
+  const W = 472, TOP = 10, rows = S.employers.slice(0, TOP), rest = S.employers.length - TOP;
+  const nameW = 112, valW = 30, x0 = nameW + 8, x1 = W - valW;
+  const rowH = 24, barH = 13, keys = ["labour", "both", "other", "ethics"];
+  const x = d3.scaleLinear().domain([0, d3.max(rows, d => d.n)]).range([0, x1 - x0]);
+
+  const g = d3.select("#emp").append("g").attr("transform", "translate(0,8)");
+  const row = g.selectAll("g").data(rows).join("g").attr("transform", (d, i) => `translate(0,${i * rowH})`);
+  row.append("text").attr("x", nameW).attr("y", barH * .8).attr("text-anchor", "end")
+     .attr("font-size", 10.5).attr("fill", C.text).text(d => d.name);
+  row.each(function(d){
+    let at = x0;
+    for (const k of keys){
+      if (!d[k]) continue;
+      d3.select(this).append("rect").attr("x", at).attr("width", Math.max(0, x(d[k]) - 1))
+        .attr("height", barH).attr("fill", THEME[k]);
+      at += x(d[k]);
+    }
+  });
+  row.append("text").attr("x", d => x0 + x(d.n) + 6).attr("y", barH * .82).attr("class", "n")
+     .attr("font-size", 10.5).attr("font-weight", 700).attr("fill", C.ink).text(d => d.n);
+
+  g.append("text").attr("x", x0).attr("y", TOP * rowH + 8)
+   .attr("font-size", 9.5).attr("fill", C.faint)
+   .text(`+${rest} more · ${S.once} appear in only one event`);
+})();
+
+/* ---------- notes ---------- */
+d3.select("#notes").html(
+  `Source: Collective Action in Tech archive. Counts reflect what the archive documented, not all organizing; ` +
+  `records from 2023 on were added in a later pass and are sparser. ${DATA.meta.to} is a partial year. ` +
+  `Theme is grouped from each event's struggles. In the matrix, an event with two actions and two struggles counts in four cells.`);
 </script>
 </body>
 </html>

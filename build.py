@@ -8,6 +8,8 @@ OUT  = os.path.join(ROOT, 'data.js')
 DATE = re.compile(r'^(\d{1,2})/(\d{1,2})/(\d{4})$|^(\d{4})-(\d{2})-(\d{2})$')
 ALIAS = {'ai ethids': 'ai ethics'}                  # typos in the source
 DROP  = {'na', ''}
+ACTION_GROUP = {'union drive':          'union drive / representation',
+                'union representation': 'union drive / representation'}
 
 def iso(cell):
     m = DATE.match((cell or '').strip())
@@ -26,62 +28,64 @@ rows = []
 for r in csv.DictReader(open(CSV, encoding='utf-8-sig')):
     # some rows have description and date swapped
     d = iso(r['date']) or iso(r['description'])
-    if d: rows.append({**r, 'date': d})
+    if not d: continue
+    # merged actions count once per event, even if it carried both originals
+    acts = ','.join(ACTION_GROUP.get(a, a) for a in items(r['actions']))
+    rows.append({**r, 'date': d, 'actions': acts})
 
-# --- 1. per year: events by struggle_type, and workers involved ----------
-def stype(r):
-    s = set(items(r['struggle_type']))
-    if s == {'internal', 'external'}: return 'both'
-    if s in ({'internal'}, {'external'}): return s.pop()
-    return 'unspecified'
-
-def nworkers(cell):
-    m = re.fullmatch(r'(\d[\d,]*)\+?', (cell or '').strip())
-    return int(m.group(1).replace(',', '')) if m else None
-
-TYPES = ['internal', 'external', 'both', 'unspecified']
-y0, y1 = min(int(r['date'][:4]) for r in rows), max(int(r['date'][:4]) for r in rows)
-years = {y: {'year': y, 'n': 0, **{t: 0 for t in TYPES}, 'workers': 0, 'counted': 0}
-         for y in range(y0, y1 + 1)}
-for r in rows:
-    yr = years[int(r['date'][:4])]
-    yr['n'] += 1
-    yr[stype(r)] += 1
-    w = nworkers(r['workers'])
-    if w is not None:
-        yr['workers'] += w
-        yr['counted'] += 1
-
-# --- 2. actions / struggles ----------------------------------------------
+# --- 1. actions / struggles ----------------------------------------------
 def tally(field):
     c = collections.Counter()
     for r in rows:
         for t in items(r[field]): c[t] += 1
     return [{'tag': t, 'n': n} for t, n in c.most_common()]
 
-# --- 3. employers --------------------------------------------------------
-emp, label = collections.Counter(), {}
-for r in rows:
-    for name in (x.strip() for x in (r['companies'] or '').split(',')):
-        k = name.lower()
-        if not name or k in ('unnamed', 'unknown', 'error'): continue
-        emp[k] += 1
-        if k not in label or name.islower(): label[k] = name   # prefer the lower-case spelling
+# --- 2. theme ------------------------------------------------------------
+# each event's theme, read from `struggles` (always filled, unlike struggle_type).
+# this grouping is a judgement call — edit the two sets to change it.
+ETHICS = {'ethics', 'discrimination', 'political speech', 'government contract',
+          'military contract', 'climate', 'racial equity', 'gender equity', 'ai ethics'}
+LABOUR = {'working conditions', 'pay and benefits', 'unfair labor practices', 'job security',
+          'retaliation', 'layoffs', 'wages', 'union activity', 'union busting'}
+EMP_GROUP = {'alphabet': 'google', 'meta': 'facebook'}
+EMP_LABEL = {'google': 'google / alphabet', 'facebook': 'facebook / meta'}
 
+def theme(r):
+    s = set(items(r['struggles']))
+    e, l = bool(s & ETHICS), bool(s & LABOUR)
+    return 'both' if e and l else 'ethics' if e else 'labour' if l else 'other'
+
+events = sorted([r['date'], theme(r)] for r in rows)
+
+# --- 3. timeline, action x struggle matrix, employers -------------------
+top_a = [d['tag'] for d in tally('actions')[:5]]
+top_s = [d['tag'] for d in tally('struggles')[:6]]
+top_s.sort(key=lambda s: s not in ETHICS)                  # ethics columns first, order kept
+matrix = {'actions': top_a, 'struggles': top_s,
+          'group': ['ethics' if s in ETHICS else 'labour' for s in top_s],
+          'n': [[sum(1 for r in rows if a in items(r['actions']) and s in items(r['struggles']))
+                 for s in top_s] for a in top_a]}
+
+emp = collections.defaultdict(collections.Counter)
+for r in rows:
+    names = {EMP_GROUP.get(k, k) for k in (x.strip().lower() for x in (r['companies'] or '').split(','))
+             if k and k not in ('unnamed', 'unknown', 'error')}
+    for k in names: emp[k][theme(r)] += 1
+employers = sorted(({'name': EMP_LABEL.get(k, k), 'n': sum(c.values()), **c}
+                    for k, c in emp.items()), key=lambda d: -d['n'])
+
+years = [int(r['date'][:4]) for r in rows]
 data = {
-    'years':     list(years.values()),
-    'types':     TYPES,
-    'actions':   tally('actions'),
-    'struggles': tally('struggles'),
-    'employers': [{'name': label[k], 'n': v} for k, v in emp.most_common()],
-    'meta': {'total': len(rows), 'from': str(y0), 'to': str(y1)},
+    'events':    events,
+    'matrix':    matrix,
+    'employers': employers,
+    'once':      sum(1 for d in employers if d['n'] == 1),
+    'meta': {'total': len(rows), 'from': str(min(years)), 'to': str(max(years))},
 }
 with open(OUT, 'w') as f:
     f.write('const DATA = ' + json.dumps(data, separators=(',', ':')) + ';\n')
 
 print(f"{OUT}  {os.path.getsize(OUT)} bytes")
 print(f"  {data['meta']['total']} records  {data['meta']['from']}-{data['meta']['to']}")
-print(f"  types: " + ', '.join(f"{t} {sum(y[t] for y in years.values())}" for t in TYPES))
-print(f"  workers: {sum(y['workers'] for y in years.values())} across "
-      f"{sum(y['counted'] for y in years.values())} records with a count")
-print(f"  {len(data['actions'])} actions, {len(data['struggles'])} struggles, {len(data['employers'])} employers")
+print("  themes: " + ', '.join(f"{t} {n}" for t, n in collections.Counter(e[1] for e in events).most_common()))
+print(f"  {len(employers)} employers, {data['once']} in only one event")

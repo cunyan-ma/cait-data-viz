@@ -10,52 +10,51 @@ Fields the visualization uses:
 
 | Column | Used for |
 |---|---|
-| `date` | year, for the per-year bars |
-| `struggle_type` | per-year bars, events view (internal / external) |
-| `workers` | per-year bars, workers view |
-| `actions` | tag graph, actions view |
-| `struggles` | tag graph, struggles view |
+| `date` | timeline position (quarter) |
+| `struggles` | each event's theme (timeline + employer colours), matrix columns |
+| `actions` | matrix rows |
 | `companies` | employer graph |
 | everything else | not used yet |
 
 ## The visualization
 
-Three graphs on one page. **Every graph is static** — each one shows all recorded observations at once. There is no year filter and no linked interaction between the graphs.
+One static figure, designed to be read from a single screenshot (`./shot.sh` → `figure.png`). No toggles, no filters. Headline: **From open letters to union drives**.
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  1 · Per year                                   │
-│     (bars, full width, toggle events ⇄ workers) │
+│  1 · Timeline — one dot per event, by quarter   │
+│      (full width, coloured by theme, 5 labels)  │
 ├──────────────────────────┬──────────────────────┤
-│  2 · Tags                │  3 · Employers       │
-│    (circles, toggle      │    (horizontal bars, │
-│     actions ⇄ struggles) │     descending)      │
-└──────────────────────────┴──────────────────────┘
+│  2 · Action × struggle   │  3 · Employers       │
+│      (heatmap)           │   (bars by theme)    │
+├──────────────────────────┴──────────────────────┤
+│  source + caveats                               │
+└─────────────────────────────────────────────────┘
 ```
 
-### 1 · Per year — top, full width
+### Theme
 
-One bar per year, 2014 → 2026. Years with no records still get a slot. A toggle switches between two views:
+Every event gets one theme, derived from its `struggles` (always filled, unlike `struggle_type`):
 
-- **Events** — the number of records that year, stacked by `struggle_type`: internal, external, both (tagged `internal,external`), and unspecified (blank).
-- **Workers** — the sum of `workers` across that year's records. Only records with a number count (`2500+` counts as 2500); `unknown`, `hundreds`, `thousands` and blanks are skipped. 165 of 232 records give a number.
+- **ethics & politics** (green) — ethics, discrimination, political speech, government/military contracts, climate, racial/gender equity, AI ethics
+- **workplace & labour** (red) — working conditions, pay and benefits, unfair labor practices, job security, retaliation, layoffs, wages, union activity, union busting
+- **both / other** (grey) — struggles from both groups, or neither
 
-### 2 · Tags — bottom left
+The grouping is the `ETHICS` / `LABOUR` sets in `build.py`. Colours are `THEME` and `C` at the top of the script in `index.html`.
 
-Shows the distribution of `actions` and `struggles`. A toggle switches the view between the two; only one is shown at a time.
+### 1 · Timeline — top, full width
 
-In either view, **every tag is a circle**:
+Each dot is one event, stacked in its quarter's column (2014 Q1 → 2026). Column height is that quarter's count; labour dots sit at the bottom of each stack so the shift over time reads as a rising band. The five labelled moments are hand-written in `MOMENTS` in `index.html`.
 
-- circle **size** = the number of observations carrying that tag
-- circle **color** = distinct per tag
+### 2 · How workers act, by cause — bottom left
 
-Layout reference: circle packing — circles of varying size packed inside a bounding shape, each labeled.
+Rows are the six most common `actions`, columns the six most common `struggles` (ethics columns first). Each cell counts events tagged with both. Shading is by count, in the column's theme colour.
 
-> **Note on totals:** the tag counts sum to more than the total number of observations, because a single observation can carry several actions or struggles. The circles show tag frequency, not a partition of the records.
+> **Note on totals:** an event with two actions and two struggles counts in four cells, so the matrix shows co-occurrence, not a partition of the records.
 
-### 3 · Employers — bottom right
+### 3 · Where — bottom right
 
-A horizontal bar graph of observation counts per employer, sorted descending so the most-referenced employer sits at the top.
+Events per employer, top 10, each bar split by theme. `alphabet` is merged into `google` and `meta` into `facebook`; an event naming both counts once.
 
 ## Roadmap
 
@@ -67,8 +66,9 @@ Things worth knowing before reading anything into the graphs:
 
 - **16 rows have `description` and `date` swapped.** `build.py` takes the date from whichever of the two columns holds one.
 - **Dates come in two formats**, `M/D/YYYY` and `YYYY-MM-DD`; both are parsed.
-- **`struggle_type` is blank for 29 records**, 28 of them from 2023 on, so the internal/external split thins out in recent years.
-- **`workers` is dominated by a few large actions.** The 2014 bar is almost entirely one class-action suit (60,000 plaintiffs).
+- **Records from 2023 on were added in a later pass** (no old `id`) and are coded more sparsely: `struggle_type` and `online` are mostly blank. That's why theme comes from `struggles`.
+- **`workers` is not visualized.** 27% of records have no number, missingness grows over time, and the values mix signatories, bargaining units and lawsuit plaintiffs.
+- **Counts reflect archiving effort, not all organizing.** Fewer dots after 2022 likely means less documentation, not less activity. 2026 is a partial year.
 - **Tag typos are normalized in `build.py`:** `ai ethids` → `ai ethics`; `na` is dropped.
-- **Company names are case-folded** (`Google` = `google`). Related names are *not* merged: `google` / `alphabet`, `facebook` / `meta` stay separate.
+- **Company names are case-folded** (`Google` = `google`).
 - **Some records name several employers** in one `companies` cell (e.g. `"google, alphabet"`), so employer counts sum to more than the record count.
